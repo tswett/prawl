@@ -1,0 +1,23 @@
+inductive {
+    sort Nat;
+    zero : Nat;
+    plus_one : Nat;
+}
+
+def plus(x: Nat, y: Nat): Nat {
+    plus(zero, y) = y;
+    plus(plus_one(x_), y) = plus_one(plus(x_, y));
+}
+
+def one: Nat = plus_one(zero);
+
+def left_ident [plus(zero, y: Nat) = y] = bydef [plus(zero, y)];
+
+def right_ident [plus(x: Nat, zero) = x] {
+    right_ident [plus(zero, zero)] =
+        left_ident [plus(zero, zero)];
+
+    right_ident [plus(plus_one(x_), zero)] =
+        bydef [plus(plus_one(x_), zero)] ..
+        right_ident plus_one([plus(x_, zero)]);
+}

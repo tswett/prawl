@@ -1,0 +1,83 @@
+# We start with the usual.
+
+# Here's how to define a simple enumerated type.
+
+inductive {
+    sort Bool;
+    true : Bool;
+    false : Bool;
+}
+
+# And how to define a simple function on it.
+
+def not(x: Bool): Bool {
+    not(true) = false;
+    not(false) = true;
+}
+
+# The syntax for names of equalities is weird.
+
+def cancel [not(not(x: Bool)) = x] {
+    cancel [not(not(true))] =
+        bydef not([not(true)]) ..
+        bydef [not(false)];
+    cancel [not(not(false))] =
+        bydef not([not(false)]) ..
+        bydef [not(true)];
+}
+
+# To be clear, the name of the equality defined above is "cancel [not(not(x: Bool))]".
+# The equality asserts that, for all such x, not(not(x)) = x.
+# The most straightforward way to instantiate this is to write, say, "cancel [not(not(true))]".
+# But "cancel not([not(not(true))])", for example, is syntactic sugar for "not(cancel [not(not(true))])".
+
+# By the way, the definition of "not" automatically defines these equations:
+#
+# bydef [not(true) = false]
+# bydef [not(false) = true]
+
+def and(x: Bool, y: Bool): Bool {
+    and(true, y) = y;
+    and(false, y) = false;
+}
+
+# Define some additional names for the bydefs of the and function.
+
+def left_ident [and(true, y: Bool) = y] = bydef [and(true, y)];
+def left_annihil [and(false, y: Bool) = false] = bydef [and(false, y)];
+
+def right_ident [and(x: Bool, true) = x] {
+    right_ident [and(true, true)] = bydef [and(true, true)];
+    right_ident [and(false, true)] = bydef [and(false, true)];
+}
+
+def right_annihil [and(x: Bool, false) = false] {
+    right_annihil [and(true, false)] = bydef [and(true, false)];
+    right_annihil [and(false, false)] = bydef [and(false, false)];
+}
+
+# Below, the intermediate line that says "y .." is completely unnecessary and doesn't do anything.
+# But it serves as a reminder of what the expression is now.
+
+def commute [and(x: Bool, y: Bool) = and(y, x)] {
+    commute [and(true, y)] =
+        left_ident [and(true, y)] ..
+        y ..
+        ^right_ident [and(y, true)];
+    commute [and(false, y)] =
+        left_annihil [and(false, y)] ..
+        false ..
+        ^right_annihil [and(y, false)];
+}
+
+def assoc [and(and(x: Bool, y: Bool), z: Bool) = and(x, and(y, z))] {
+    assoc [and(and(true, y), z))] =
+        left_ident and([and(true, y)], z) ..
+        and(y, z) ..
+        ^left_ident [and(true, and(y, z))];
+    assoc [and(and(false, y), z))] =
+        left_annihil and([and(false, y)], z) ..
+        left_annihil [and(false, z)] ..
+        false ..
+        ^left_annihil [and(false, and(y, z))];
+}
