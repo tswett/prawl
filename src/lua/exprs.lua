@@ -50,4 +50,8 @@ function exprs.expr(input)
     end
 end
 
+function exprs.footest()
+    return 'foo'
+end
+
 return exprs
